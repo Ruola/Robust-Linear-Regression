@@ -22,9 +22,10 @@ class IterativeTrimmedRegression:
         """
         # To throw 2*o largest coordinates.
         # set_remaining_indices - Set of remaining indices.
-        set_remaining_indices = np.argpartition(
-            y - np.dot(H, x), num_remaining_indices)[:num_remaining_indices]
-        set_remaining_indices = np.sort(set_remaining_indices)
+        #set_remaining_indices = np.argpartition(y - np.dot(H, x), num_remaining_indices)[:num_remaining_indices]
+        #set_remaining_indices = np.sort(set_remaining_indices)
+        temp = np.argsort(np.abs(y - np.dot(H, x)))
+        set_remaining_indices = temp[:num_remaining_indices]
         H_remaining = np.array(H)[set_remaining_indices]
         y_remaining = np.array(y)[set_remaining_indices]
         x = np.dot(pinvh(np.dot(np.transpose(H_remaining), H_remaining)),
