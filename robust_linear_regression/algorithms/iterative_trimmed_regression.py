@@ -8,20 +8,17 @@ from utils.error import Error
 class IterativeTrimmedRegression:
     """Use iterative trimmed regression to solve robust linear regression.
     """
-    def __init__(self):
+    def __init__(self, o=constants.O):
         self.error_name = constants.GENERALIZATION_ERROR_NAME
+        self.o = o
 
-    def get_signal_estimation(self,
-                              y,
-                              H,
-                              x,
-                              num_remaining_indices=constants.N -
-                              3 * constants.O):
+    def get_signal_estimation(self, y, H, x, num_remaining_indices):
         """Run one iteration.
         
         @param y - the observations/response.
         @param H - the design matrix.
         @param x - estimation of signal, \hat{x}.
+        @param num_remaining_indices - number of remaining coordinates.
         """
         # To throw 2*o largest coordinates.
         # set_remaining_indices - Set of remaining indices.
@@ -56,8 +53,7 @@ class IterativeTrimmedRegression:
         # record generalization errors of estimation in each iteration
         errors = [0] * num_iter
         for i in range(num_iter):
-            x = self.get_signal_estimation(y, H, x)
-            print(np.max(x))
+            x = self.get_signal_estimation(y, H, x, constants.N - 3 * self.o)
             if errors_needed:
                 errors[i] = Error().get_error(x_original, x, self.error_name,
                                               SIGMA_half, y, H)
