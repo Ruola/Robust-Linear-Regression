@@ -56,7 +56,7 @@ class CompareGeneralizationError:
     def change_fraction_of_outlier(self):
         """Change of generalization error w.r.t. fraction of outlier.
         """
-        o_range = list(range(100, 600, 100))
+        o_range = list(range(100, 301, 10))
         errors_matrices = np.zeros((constants.STEPS, len(o_range)))
         for i in range(constants.STEPS):  # do several experiments
             for j in range(len(o_range)):

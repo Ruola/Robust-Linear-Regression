@@ -32,5 +32,8 @@ class GenerateData:
         y = np.dot(H, self.x) + np.random.normal(
             self.mu, self.sigma, size=(self.n))
         y[:self.o] = 0
-        y = np.random.permutation(y)
+        indices = np.arange(len(H))
+        np.random.shuffle(indices)
+        H = np.asarray(H)[indices]
+        y = np.asarray(y)[indices]
         return (y, H, self.SIGMA_half)
