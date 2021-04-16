@@ -32,6 +32,9 @@ class GenerateData:
         y = np.dot(H, self.x) + np.random.normal(
             self.mu, self.sigma, size=(self.n))
         y[:self.o] = 0
+        # corruption on the design
+        vect = self.x / np.linalg.norm(self.x, 2) * np.sqrt(self.p)
+        H[:self.o] = vect.T
         indices = np.arange(len(H))
         np.random.shuffle(indices)
         H = np.asarray(H)[indices]
