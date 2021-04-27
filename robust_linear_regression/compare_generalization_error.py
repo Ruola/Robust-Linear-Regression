@@ -112,6 +112,8 @@ class CompareGeneralizationError:
         plt.clf()
 
     def change_number_of_features(self):
+        """Change of generalization error w.r.t. the number of features.
+        """
         p_range = list(range(10, 200, 20))
         errors_matrices = np.zeros((self.steps, len(p_range)))
         for i in range(self.steps):  # do several experiments
