@@ -33,8 +33,8 @@ class CompareGeneralizationError:
     def compare_convergence_rate(self):
         """Get the change of generalization error w.r.t. #iterations.
         """
-        errors_matrices = np.zeros((constants.STEPS, constants.N_ITERATION))
-        for i in range(constants.STEPS):  # do several experiments
+        errors_matrices = np.zeros((self.steps, constants.N_ITERATION))
+        for i in range(self.steps):  # do several experiments
             x_original, y, H, SIGMA_half = GenerateData(
                 self.is_design_corruption, self.kappa).generate_data()
             x, error = IterativeTrimmedRegression().get_errors(
@@ -61,8 +61,8 @@ class CompareGeneralizationError:
         """Change of generalization error w.r.t. fraction of outlier.
         """
         o_range = list(range(100, 301, 10))
-        errors_matrices = np.zeros((constants.STEPS, len(o_range)))
-        for i in range(constants.STEPS):  # do several experiments
+        errors_matrices = np.zeros((self.steps, len(o_range)))
+        for i in range(self.steps):  # do several experiments
             for j in range(len(o_range)):
                 o = o_range[j]
                 x_original, y, H, SIGMA_half = GenerateData(
@@ -89,8 +89,8 @@ class CompareGeneralizationError:
         """Change of generalization error w.r.t. the condition number.
         """
         kappa_range = list(range(1, 50, 10))
-        errors_matrices = np.zeros((constants.STEPS, len(kappa_range)))
-        for i in range(constants.STEPS):  # do several experiments
+        errors_matrices = np.zeros((self.steps, len(kappa_range)))
+        for i in range(self.steps):  # do several experiments
             for j in range(len(kappa_range)):
                 kappa = kappa_range[j]
                 x_original, y, H, SIGMA_half = GenerateData(
@@ -113,8 +113,8 @@ class CompareGeneralizationError:
 
     def change_number_of_features(self):
         p_range = list(range(10, 200, 20))
-        errors_matrices = np.zeros((constants.STEPS, len(p_range)))
-        for i in range(constants.STEPS):  # do several experiments
+        errors_matrices = np.zeros((self.steps, len(p_range)))
+        for i in range(self.steps):  # do several experiments
             for j in range(len(p_range)):
                 p = p_range[j]
                 x_original, y, H, SIGMA_half = GenerateData(
@@ -123,7 +123,8 @@ class CompareGeneralizationError:
                 _, error = IterativeTrimmedRegression().get_errors(
                     x_original, y, H, SIGMA_half, self.num_iter, True)
                 errors_matrices[i][j] += error[-1]
-        plt.plot(np.mean(errors_matrices, axis=0),
+        plt.plot(np.array(p_range),
+                 np.mean(errors_matrices, axis=0),
                  label="IterativeTrimmedRegression")
         plt.xlabel("number of features")
         plt.ylabel("generalization error")
