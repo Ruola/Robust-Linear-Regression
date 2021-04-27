@@ -16,30 +16,35 @@ from utils.generate_data import GenerateData
 class CompareGeneralizationError:
     """Simulations on iterative trimmed regression.
     """
-    def __init__(self, kappa=1.):
+    def __init__(self, is_design_corruption=True, kappa=1.):
         """Initialize.
 
         @param kappa - condition number of design matrix.
         """
+        self.is_design_corruption = is_design_corruption
         self.kappa = kappa
         self.steps = constants.STEPS
         self.num_iter = constants.N_ITERATION
-        self.x_original = constants.X
+        if self.is_design_corruption:
+            self.folder_name = "/figures/design matrix corruption"
+        else:
+            self.folder_name = "/figures/no design matrix corruption"
 
     def compare_convergence_rate(self):
         """Get the change of generalization error w.r.t. #iterations.
         """
         errors_matrices = np.zeros((constants.STEPS, constants.N_ITERATION))
         for i in range(constants.STEPS):  # do several experiments
-            y, H, SIGMA_half = GenerateData(self.kappa).generate_data()
+            x_original, y, H, SIGMA_half = GenerateData(
+                self.is_design_corruption, self.kappa).generate_data()
             x, error = IterativeTrimmedRegression().get_errors(
-                self.x_original, y, H, SIGMA_half, self.num_iter, True)
+                x_original, y, H, SIGMA_half, self.num_iter, True)
             errors_matrices[i] = error
         plt.plot(np.mean(errors_matrices, axis=0),
                  label="IterativeTrimmedRegression")
         baseline_estimate = np.dot(pinvh(np.dot(np.transpose(H), H)),
                                    np.dot(np.transpose(H), y))
-        baseline_error = Error().get_error(self.x_original, baseline_estimate,
+        baseline_error = Error().get_error(x_original, baseline_estimate,
                                            constants.GENERALIZATION_ERROR_NAME,
                                            SIGMA_half)
         plt.plot([baseline_error] * self.num_iter, label="Baseline")
@@ -48,9 +53,8 @@ class CompareGeneralizationError:
         plt.title("Convergence rate as kappa=" + str(int(self.kappa)))
         plt.legend()
         plt.savefig(
-            os.path.dirname(os.path.abspath(__file__)) +
-            "/figures/convergence rate as kappa " + str(int(self.kappa)) +
-            ".pdf")
+            os.path.dirname(os.path.abspath(__file__)) + self.folder_name +
+            "/convergence rate as kappa " + str(int(self.kappa)) + ".pdf")
         plt.clf()
 
     def change_fraction_of_outlier(self):
@@ -61,9 +65,10 @@ class CompareGeneralizationError:
         for i in range(constants.STEPS):  # do several experiments
             for j in range(len(o_range)):
                 o = o_range[j]
-                y, H, SIGMA_half = GenerateData(self.kappa, o).generate_data()
+                x_original, y, H, SIGMA_half = GenerateData(
+                    self.is_design_corruption, self.kappa, o).generate_data()
                 x, error = IterativeTrimmedRegression(o).get_errors(
-                    self.x_original, y, H, SIGMA_half, self.num_iter, True)
+                    x_original, y, H, SIGMA_half, self.num_iter, True)
                 errors_matrices[i][j] += error[-1]
         fraction_of_outlier = np.array(o_range) / constants.N
         plt.plot(fraction_of_outlier,
@@ -75,9 +80,9 @@ class CompareGeneralizationError:
                   str(int(self.kappa)))
         plt.legend()
         plt.savefig(
-            os.path.dirname(os.path.abspath(__file__)) +
-            "/figures/change fraction of outlier as kappa " +
-            str(int(self.kappa)) + ".pdf")
+            os.path.dirname(os.path.abspath(__file__)) + self.folder_name +
+            "/change fraction of outlier as kappa " + str(int(self.kappa)) +
+            ".pdf")
         plt.clf()
 
     def change_condition_number(self):
@@ -88,9 +93,10 @@ class CompareGeneralizationError:
         for i in range(constants.STEPS):  # do several experiments
             for j in range(len(kappa_range)):
                 kappa = kappa_range[j]
-                y, H, SIGMA_half = GenerateData(kappa).generate_data()
+                x_original, y, H, SIGMA_half = GenerateData(
+                    self.is_design_corruption, kappa).generate_data()
                 x, error = IterativeTrimmedRegression().get_errors(
-                    self.x_original, y, H, SIGMA_half, self.num_iter, True)
+                    x_original, y, H, SIGMA_half, self.num_iter, True)
                 errors_matrices[i][j] += error[-1]
         fraction_of_outlier = np.array(kappa_range) / constants.N
         plt.plot(fraction_of_outlier,
@@ -101,15 +107,45 @@ class CompareGeneralizationError:
         plt.title("Change condition number")
         plt.legend()
         plt.savefig(
-            os.path.dirname(os.path.abspath(__file__)) +
-            "/figures/change condition number.pdf")
+            os.path.dirname(os.path.abspath(__file__)) + self.folder_name +
+            "/change condition number.pdf")
+        plt.clf()
+
+    def change_number_of_features(self):
+        p_range = list(range(10, 200, 20))
+        errors_matrices = np.zeros((constants.STEPS, len(p_range)))
+        for i in range(constants.STEPS):  # do several experiments
+            for j in range(len(p_range)):
+                p = p_range[j]
+                x_original, y, H, SIGMA_half = GenerateData(
+                    self.is_design_corruption, self.kappa, constants.O,
+                    p).generate_data()
+                _, error = IterativeTrimmedRegression().get_errors(
+                    x_original, y, H, SIGMA_half, self.num_iter, True)
+                errors_matrices[i][j] += error[-1]
+        plt.plot(np.mean(errors_matrices, axis=0),
+                 label="IterativeTrimmedRegression")
+        plt.xlabel("number of features")
+        plt.ylabel("generalization error")
+        plt.title("Change the number of features + kappa=" +
+                  str(int(self.kappa)))
+        plt.legend()
+        plt.savefig(
+            os.path.dirname(os.path.abspath(__file__)) + self.folder_name +
+            "/change number of features kappa" + str(int(self.kappa)) + ".pdf")
         plt.clf()
 
 
 if __name__ == "__main__":
     """Run simulations.
     """
+    is_design_corruption = False
     kappa = 1.  # condition number
-    CompareGeneralizationError(kappa).compare_convergence_rate()
-    CompareGeneralizationError(kappa).change_fraction_of_outlier()
-    CompareGeneralizationError().change_condition_number()
+
+    CompareGeneralizationError(is_design_corruption,
+                               kappa).compare_convergence_rate()
+    CompareGeneralizationError(is_design_corruption,
+                               kappa).change_fraction_of_outlier()
+    CompareGeneralizationError(is_design_corruption).change_condition_number()
+    CompareGeneralizationError(is_design_corruption,
+                               kappa).change_number_of_features()

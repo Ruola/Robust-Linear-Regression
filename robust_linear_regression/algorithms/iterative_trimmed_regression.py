@@ -50,7 +50,7 @@ class IterativeTrimmedRegression:
         @return x - estimation \hat{x};
                 gener_errors - generalization errors of estimation in each iteration.
         """
-        x = np.zeros((constants.P))  # initial value of estimation
+        x = np.zeros(np.size(x_original))  # initial value of estimation
         # record generalization errors of estimation in each iteration
         errors = [0] * num_iter
         for i in range(num_iter):

@@ -15,13 +15,12 @@ import numpy as np
 """
 STEPS = 200
 N_ITERATION = 100
-N, P, O = 1000, 10, 100
+N, P, O = 2000, 20, 300
 # noise
 MU = 0
 SIGMA_NUMBER = .1
 # signal
 X_VALUE = 10.
-X = X_VALUE * np.ones((P))
 KAPPA = 1.
 
 PREDICTION_ERROR_NAME = "prediction error"
